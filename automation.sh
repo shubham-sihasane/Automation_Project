@@ -101,4 +101,35 @@ echo "Uploading $filename to S3 bucket $s3_bucket_name..."
 aws s3 cp /tmp/$filename s3://$s3_bucket_name//$filename
 
 
+############################################################################
+
+
+# Update inventory file information with archives:
+if [ -e $inv_file ]
+then
+    echo "Adding archive details to inventory.html file..."
+    fsize=$(ls -lh /tmp/$filename | awk '{ print $5}')
+    printf "<p>httpd-logs &emsp;&emsp;&emsp;&emsp; $timestamp &emsp;&emsp;&emsp;&emsp; tar &emsp;&emsp;&emsp;&emsp; $fsize \n" >> $inv_file
+    echo "Details are added to inventory.html file."
+else
+    echo "Inventory.html file does not exists. Creating the file..."
+    printf "<p style='padding: 10px; border: 2px solid #ccc; background-color:#f5f5f5;'>cat /var/www/html/inventory.html</p> \n <h3>Log Type &emsp;&emsp;&emsp; Date Created &emsp;&emsp;&emsp; Type &emsp;&emsp;&emsp; Size</h3> \n" > $inv_file
+    fsize=$(ls -lh /tmp/$filename | awk '{ print $5}')
+    printf "<p>httpd-logs &emsp;&emsp;&emsp;&emsp; $timestamp &emsp;&emsp;&emsp;&emsp; tar &emsp;&emsp;&emsp;&emsp; $fsize \n" >> $inv_file
+    echo "Details are added to inventory.html file."
+fi
+
+
+############################################################################
+
+
+# Check if Cron Job exists or not. If not create Cron Job to execute the script everyday:
+
+if [ ! -f $cron_file ]
+then
+    echo "Creating a Cron Job..."
+    printf "0 0 * * * root /root/Automation_Project/automation.sh\n" > $cron_file 
+fi
+
+
 ##############################END OF THE SCRIPT##############################
